@@ -1,0 +1,61 @@
+```
+from diffusers import DiffusionPipeline
+import torch
+from torch import autocast
+from pathlib import Path
+import os
+from os.path import dirname
+from PIL import Image
+
+from diffusers import (
+        DDPMScheduler,
+        DDIMScheduler,
+        PNDMScheduler,
+        LMSDiscreteScheduler,
+        EulerDiscreteScheduler,
+        EulerAncestralDiscreteScheduler,
+        DPMSolverMultistepScheduler,
+)
+
+pndm = DDPMScheduler.from_pretrained("./stable-diffusion-v1-5", subfolder="scheduler")
+
+pipe = DiffusionPipeline.from_pretrained(
+        "./stable-diffusion-v1-5",
+        revision='fp16',
+        torch_dtype=torch.float16,
+        schedular=pndm,
+        safety_checker=None,  # Very important for videos...lots of false positives while interpolating
+        custom_pipeline="img2img_video_stable_diffusion",
+    ).to('cuda')
+pipe.enable_attention_slicing()
+
+outputdir = "./result_video"
+with autocast("cuda"), torch.inference_mode():
+    pipe.interpolate(
+            prompts=['a fighting lion'],
+            seeds=[42, 1337],
+            image='lion_illustration.png',
+            num_interpolation_steps=15,
+            output_dir=outputdir,
+            height=512,
+            width=512,
+            guidance_scale=8.5,
+            num_inference_steps=80,
+    )
+
+
+img = Image.open('lion_illustration.png')
+for i in range(3):
+    img.save(path + "/frame_00" + str(i) + ".png")
+
+i_files = f"{outputdir}"
+video_path = f"./result_video.mp4"
+result = os.system(f"ffmpeg -framerate 5 -pattern_type glob "
+                    f"-i ./{i_files}/\'*.png\' "
+                    f"-c:v libx264 -pix_fmt yuv420p "
+                    f"{video_path}"
+                    f" -vf setpts=4*PTS"
+                    f" -loglevel quiet")
+
+
+```
