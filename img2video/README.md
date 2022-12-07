@@ -17,7 +17,7 @@ from diffusers import (
         DPMSolverMultistepScheduler,
 )
 
-pndm = DDPMScheduler.from_pretrained("./stable-diffusion-v1-5", subfolder="scheduler")
+pndm = DDPMScheduler.from_pretrained("runwayml/stable-diffusion-v1-5", subfolder="scheduler")
 
 pipe = DiffusionPipeline.from_pretrained(
         "./stable-diffusion-v1-5",
