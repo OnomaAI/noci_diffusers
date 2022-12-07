@@ -707,8 +707,7 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
         save_path = Path(output_dir)
         save_path.mkdir(exist_ok=True, parents=True)
 
-        frame_idx = 0
-        frame_filepaths = []
+        idx = 5
         for seed_a, seed_b in zip(seeds, seeds[1:]):
             # Get Noise
             noise_dtype = torch.float32
@@ -734,7 +733,8 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
                     )
                 noise_batch, embeds_batch = None, None
 
-                for idx, image in enumerate(outputs["images"], start=5):
+                for image in outputs["images"]:
                     frame_filepath = str(save_path / f"{idx:02d}.png")
                     image.save(frame_filepath)
+                    idx += 1
 
