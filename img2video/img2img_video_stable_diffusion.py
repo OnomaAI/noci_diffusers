@@ -734,9 +734,7 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
                     )
                 noise_batch, embeds_batch = None, None
 
-                for image in outputs["images"]:
-                    frame_filepath = str(save_path / f"{frame_idx:02d}.png")
+                for idx, image in enumerate(outputs["images"], start=5):
+                    frame_filepath = str(save_path / f"{idx:02d}.png")
                     image.save(frame_filepath)
-                    frame_filepaths.append(frame_filepath)
-                    frame_idx += 1
 
