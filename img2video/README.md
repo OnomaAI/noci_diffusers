@@ -34,7 +34,7 @@ pipe.enable_attention_slicing()
 
 outputdir = "./result_video"
 with autocast("cuda"), torch.inference_mode():
-    pipe.interpolate(
+    last_image = pipe.interpolate(
             prompts=['a fighting lion'],
             seeds=[42, 1337],
             image='lion_illustration.png',
