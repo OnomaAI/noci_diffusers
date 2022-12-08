@@ -699,14 +699,14 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
                 [`schedulers.DDIMScheduler`], will be ignored for others.
 
         Returns:
-            `List[str]`: List of paths to the generated images.
+            `str`: the last one out of all generated images.
         """
 
         init_image = Image.open(image).convert("RGB")
 
         save_path = Path(output_dir)
         save_path.mkdir(exist_ok=True, parents=True)
-
+        file_paths = []
         idx = 5
         for seed_a, seed_b in zip(seeds, seeds[1:]):
             # Get Noise
@@ -736,5 +736,8 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
                 for image in outputs["images"]:
                     frame_filepath = str(save_path / f"{idx:02d}.png")
                     image.save(frame_filepath)
+                    file_paths.append(frame_filepath)
                     idx += 1
 
+        file_paths.sort(reverse=True)
+        return file_paths[0]
