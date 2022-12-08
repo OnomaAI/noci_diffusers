@@ -659,7 +659,7 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
     def interpolate(
         self,
         prompts: List[str],
-        image: str,
+        image: PIL.Image.Image,
         seeds: List[int],
         num_interpolation_steps: Optional[int] = 6,
         output_dir: Optional[str] = "./result_video",
@@ -675,6 +675,8 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
         Args:
             prompts (`List[str]`):
                 List of prompts to generate images for.
+            image ('PIL.Image.Image'):
+                initial image
             seeds (`List[int]`):
                 List of seeds corresponding to provided prompts. Must be the same length as prompts.
             num_interpolation_steps (`int`, *optional*, defaults to 6):
@@ -699,14 +701,14 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
                 [`schedulers.DDIMScheduler`], will be ignored for others.
 
         Returns:
-            `str`: the last one out of all generated images.
+            `str`: the generated last image.
         """
 
-        init_image = Image.open(image).convert("RGB")
-
+        #init_image = Image.open(image).convert("RGB")
+        init_image = image
+        file_paths = []
         save_path = Path(output_dir)
         save_path.mkdir(exist_ok=True, parents=True)
-        file_paths = []
         idx = 5
         for seed_a, seed_b in zip(seeds, seeds[1:]):
             # Get Noise
@@ -720,7 +722,6 @@ class StableDiffusionImg2Img4VideoPipeline(DiffusionPipeline):
                 noise = slerp(float(t), noise_a, noise_b)
                 noise_batch = noise if noise_batch is None else torch.cat([noise_batch, noise], dim=0)
                 #print(noise_batch.size())
-
                 outputs = self(
                         prompt=prompts,
                         image=init_image,
